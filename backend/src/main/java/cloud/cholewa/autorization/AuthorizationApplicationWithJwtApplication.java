@@ -11,5 +11,4 @@ public class AuthorizationApplicationWithJwtApplication {
     public static void main(String[] args) {
         SpringApplication.run(AuthorizationApplicationWithJwtApplication.class, args);
     }
-
 }
