@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @Configuration
 @RequiredArgsConstructor
-public class Security extends WebSecurityConfigurerAdapter {
+public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsApplication userDetails;
 
@@ -21,7 +21,12 @@ public class Security extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/register").permitAll()
-                .antMatchers("/").permitAll()
+                .antMatchers("/login").permitAll()
+                .antMatchers("/api/**").authenticated()
+                .and()
+                .formLogin().permitAll()
+                .and()
+                .cors()
                 .and()
                 .csrf().disable();
     }

@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 
 @Configuration
 @RequiredArgsConstructor
-public class Config {
+public class ApplicationConfig {
 
     private final UserRepository userRepository;
     private final SetupApplication setupApplication;

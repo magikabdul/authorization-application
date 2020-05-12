@@ -58,7 +58,6 @@ public class User implements UserDetails {
 
             set.add(new SimpleGrantedAuthority("ROLE_" + r));
         }
-        System.out.println(roles);
 
         return set;
     }
