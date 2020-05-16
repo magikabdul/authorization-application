@@ -5,29 +5,33 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsApplication userDetails;
+    private final TokenFilter tokenFilter;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetails);
     }
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/register").permitAll()
+        http.csrf().disable();
+
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.addFilterBefore(tokenFilter, BasicAuthenticationFilter.class)
+                .authorizeRequests()
                 .antMatchers("/login").permitAll()
-                .antMatchers("/api/**").authenticated()
-                .and()
-                .formLogin().permitAll()
-                .and()
-                .cors()
-                .and()
-                .csrf().disable();
+                .antMatchers("/register").permitAll()
+                .antMatchers("/api/users").hasRole("ADMIN")
+                .anyRequest().authenticated();
     }
 }

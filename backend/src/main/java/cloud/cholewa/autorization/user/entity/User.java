@@ -38,6 +38,9 @@ public class User implements UserDetails {
 
     private String roles;
 
+    @OneToOne
+    private AccessToken accessToken;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> set = new HashSet<>();

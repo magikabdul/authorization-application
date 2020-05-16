@@ -1,23 +1,34 @@
 package cloud.cholewa.autorization.user.boundary;
 
+import cloud.cholewa.autorization.user.entity.User;
+import cloud.cholewa.autorization.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/")
+@CrossOrigin("*")
 public class UserApi {
 
-    @PostMapping(value = "/register")
+    private final UserService userService;
+
+    @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody UserCreate userCreate) {
-        return new ResponseEntity<>("Works", HttpStatus.OK);
+        return new ResponseEntity<>("Works /register", HttpStatus.OK);
     }
 
-    @PostMapping(value = "/login")
-    public ResponseEntity<String> login() {
-        return new ResponseEntity<>("Works", HttpStatus.OK);
+    @PostMapping("login")
+    public ResponseEntity<AccessTokenResponse> login(@RequestBody UserLogin userLogin) {
+        return new ResponseEntity<>(userService.issueToken(userLogin), HttpStatus.OK);
+    }
+
+    @GetMapping("api/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 }
