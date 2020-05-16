@@ -1,10 +1,8 @@
 package cloud.cholewa.autorization.user.service;
 
-import cloud.cholewa.autorization.exceptions.UserNotFound;
-import cloud.cholewa.autorization.user.boundary.AccessTokenRepository;
-import cloud.cholewa.autorization.user.boundary.AccessTokenResponse;
-import cloud.cholewa.autorization.user.boundary.UserLogin;
-import cloud.cholewa.autorization.user.boundary.UserRepository;
+import cloud.cholewa.autorization.exceptions.UserAccessException;
+import cloud.cholewa.autorization.exceptions.UserCreateExceptions;
+import cloud.cholewa.autorization.user.boundary.*;
 import cloud.cholewa.autorization.user.entity.AccessToken;
 import cloud.cholewa.autorization.user.entity.User;
 import io.jsonwebtoken.Jwts;
@@ -56,7 +54,35 @@ public class UserService {
             return new AccessTokenResponse(token);
         }
 
-        throw new UserNotFound("Invalid credentials");
+        throw new UserAccessException("Invalid credentials");
+    }
+
+    public UserResponse addUser(UserCreate userCreate) {
+        if(userRepository.findByUsername(userCreate.getUsername()).isPresent()) throw new UserCreateExceptions("Username already exists");
+        if(userRepository.findByEmail(userCreate.getEmail()).isPresent()) throw new UserCreateExceptions("Email already exists");
+
+        User newUser = new User();
+        newUser.setFirstName(userCreate.getFirstName());
+        newUser.setLastName(userCreate.getLastName());
+        newUser.setUsername(userCreate.getUsername());
+        newUser.setPassword(passwordEncoder.encode(userCreate.getPassword()));
+        newUser.setEmail(userCreate.getEmail());
+        newUser.setAccountNonExpired(true);
+        newUser.setAccountNonLocked(true);
+        newUser.setCredentialsNonExpired(true);
+        newUser.setEnabled(false);
+        newUser.setRoles("USER");
+
+        User user = userRepository.save(newUser);
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .message("User created")
+                .build();
     }
 
 
@@ -68,30 +94,30 @@ public class UserService {
             return u1.orElseGet(u2::get);
         }
 
-        throw new UserNotFound("User not found");
+        throw new UserAccessException("User not found");
     }
 
     private void checkIsAccountNonExpired(User user) {
         if (!user.isAccountNonExpired()) {
-            throw new UserNotFound("Account is expired");
+            throw new UserAccessException("Account is expired");
         }
     }
 
     private void checkIsAccountNonLocked(User user) {
         if (!user.isAccountNonLocked()) {
-            throw new UserNotFound("Account is locked");
+            throw new UserAccessException("Account is locked");
         }
     }
 
     private void checkIsCredentialNonExpired(User user) {
         if (!user.isCredentialsNonExpired()) {
-            throw new UserNotFound("Credential has expired");
+            throw new UserAccessException("Credential has expired");
         }
     }
 
     private void checkIsAccountEnabled(User user) {
         if (!user.isEnabled()) {
-            throw new UserNotFound("Account not active");
+            throw new UserAccessException("Account not active");
         }
     }
 

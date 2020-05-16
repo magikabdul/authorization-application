@@ -18,8 +18,8 @@ public class UserApi {
     private final UserService userService;
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody UserCreate userCreate) {
-        return new ResponseEntity<>("Works /register", HttpStatus.OK);
+    public ResponseEntity<UserResponse> register(@RequestBody UserCreate userCreate) {
+        return new ResponseEntity<>(userService.addUser(userCreate), HttpStatus.CREATED);
     }
 
     @PostMapping("login")
