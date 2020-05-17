@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -27,8 +28,13 @@ public class UserApi {
         return new ResponseEntity<>(userService.issueToken(userLogin), HttpStatus.OK);
     }
 
-    @GetMapping("api/users")
+    @GetMapping("api/admin")
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    }
+
+    @GetMapping("/api/user")
+    public ResponseEntity<String> userTest(Principal principal) {
+        return new ResponseEntity<>("Hello User:" + principal.getName(), HttpStatus.OK);
     }
 }

@@ -17,7 +17,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-//@Builder
 public class User implements UserDetails {
 
     @Id
@@ -41,6 +40,9 @@ public class User implements UserDetails {
 
     @OneToOne
     private AccessToken accessToken;
+
+    @OneToOne
+    private ActivateToken activateToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,9 +1,11 @@
 package cloud.cholewa.autorization.user.service;
 
+import cloud.cholewa.autorization.configuration.EmailService;
 import cloud.cholewa.autorization.exceptions.UserAccessException;
 import cloud.cholewa.autorization.exceptions.UserCreateExceptions;
 import cloud.cholewa.autorization.user.boundary.*;
 import cloud.cholewa.autorization.user.entity.AccessToken;
+import cloud.cholewa.autorization.user.entity.ActivateToken;
 import cloud.cholewa.autorization.user.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -22,6 +25,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AccessTokenRepository accessTokenRepository;
+    private final EmailService emailService;
+    private final ActivateTokenRepository activateTokenRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -61,6 +66,10 @@ public class UserService {
         if(userRepository.findByUsername(userCreate.getUsername()).isPresent()) throw new UserCreateExceptions("Username already exists");
         if(userRepository.findByEmail(userCreate.getEmail()).isPresent()) throw new UserCreateExceptions("Email already exists");
 
+        ActivateToken activateToken = new ActivateToken();
+        activateToken.setToken(UUID.randomUUID().toString());
+        activateTokenRepository.save(activateToken);
+
         User newUser = new User();
         newUser.setFirstName(userCreate.getFirstName());
         newUser.setLastName(userCreate.getLastName());
@@ -72,8 +81,13 @@ public class UserService {
         newUser.setCredentialsNonExpired(true);
         newUser.setEnabled(false);
         newUser.setRoles("USER");
+        newUser.setActivateToken(activateToken);
 
         User user = userRepository.save(newUser);
+
+        String message = "https://localhost:8443/verify?token=" + activateToken.getToken();
+        Thread thread = new Thread(() -> emailService.send(user.getEmail(), "Activate your account", message));
+        thread.start();
 
         return UserResponse.builder()
                 .id(user.getId())

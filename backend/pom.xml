@@ -11,7 +11,7 @@
     <groupId>cloud.cholewa</groupId>
     <artifactId>autorization</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Autorization application with JWT</name>
+    <name>Authorization application with JWT</name>
     <description>Demo application for authorization with Java and React</description>
 
     <properties>
@@ -19,6 +19,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
