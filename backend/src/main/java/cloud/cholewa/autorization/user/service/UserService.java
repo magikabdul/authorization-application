@@ -12,7 +12,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +64,7 @@ public class UserService {
         throw new UserAccessException("Invalid credentials");
     }
 
-    public UserResponse addUser(UserCreate userCreate) {
+    public UserResponse addUser(UserCreate userCreate, HttpServletRequest httpServletRequest) {
         if(userRepository.findByUsername(userCreate.getUsername()).isPresent()) throw new UserCreateExceptions("Username already exists");
         if(userRepository.findByEmail(userCreate.getEmail()).isPresent()) throw new UserCreateExceptions("Email already exists");
 
@@ -85,8 +87,16 @@ public class UserService {
 
         User user = userRepository.save(newUser);
 
-        String message = "https://localhost:8443/verify?token=" + activateToken.getToken();
-        Thread thread = new Thread(() -> emailService.send(user.getEmail(), "Activate your account", message));
+        String uri = UriComponentsBuilder.newInstance()
+                .scheme(httpServletRequest.getScheme())
+                .host("192.168.1.128")
+                .port(httpServletRequest.getLocalPort())
+                .path("/activate")
+                .query("token=" + activateToken.getToken())
+                .build()
+                .toUriString();
+
+        Thread thread = new Thread(() -> emailService.send(user.getEmail(), "Activate your account", uri));
         thread.start();
 
         return UserResponse.builder()
@@ -96,6 +106,26 @@ public class UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .message("User created")
+                .build();
+    }
+
+    public UserResponse activateAccount(String token) {
+        User user = userRepository.findByActivateToken_Token(token).orElseThrow(()-> new UserCreateExceptions("Activate token invalid"));
+
+        if (!user.isEnabled()) {
+            user.setEnabled(true);
+            ActivateToken activateToken = user.getActivateToken();
+            user.setActivateToken(null);
+
+            userRepository.save(user);
+            activateTokenRepository.delete(activateToken);
+        } else
+            activateTokenRepository.delete(user.getActivateToken());
+
+        return UserResponse.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .message("Account activated")
                 .build();
     }
 
