@@ -1,4 +1,4 @@
-import { LOGIN } from '../actions';
+import { LOGIN, REGISTER } from '../actions';
 
 const rootReducer = (state = {}, action) => {
   switch (action.type) {
@@ -35,6 +35,33 @@ const rootReducer = (state = {}, action) => {
       delete state.token;
       return {
         ...state,
+        isLoading: false,
+      };
+
+    case REGISTER.REQUEST:
+      return {
+        isLoading: true,
+        ...state,
+      };
+
+    case REGISTER.SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        registrationError: null,
+      };
+
+    case REGISTER.ERROR:
+      return {
+        ...state,
+        registrationError: action.payload,
+        isLoading: false,
+      };
+
+    case REGISTER.FAILURE:
+      return {
+        ...state,
+        registrationError: 'Something went wrong',
         isLoading: false,
       };
 

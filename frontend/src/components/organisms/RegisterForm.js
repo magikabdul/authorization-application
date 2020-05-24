@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { connect } from 'react-redux';
+import { fetchRegister } from '../../actions';
 
 import {
   Button,
@@ -56,22 +57,33 @@ const ButtonBox = styled.div`
   padding: 30px 10px;
 `;
 
-function RegisterForm({ setMode }) {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [userName, setUserName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password1, setPassword1] = useState('');
-  const [password2, setPassword2] = useState('');
+function RegisterForm({ register, setMode, registrationError }) {
+  const [firstName, setFirstName] = useState('Leszek');
+  const [lastName, setLastName] = useState('Loren');
+  const [userName, setUserName] = useState('lechu');
+  const [email, setEmail] = useState('lech@com.pl');
+  const [password1, setPassword1] = useState('123');
+  const [password2, setPassword2] = useState('123');
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = () => {
     if (password1 !== password2) {
       setError(true);
+      setErrorMessage("Password doesn't match");
     } else {
       setError(false);
+
+      register(firstName, lastName, userName, email, password1);
     }
   };
+
+  useEffect(() => {
+    setErrorMessage(registrationError);
+    if (errorMessage === 'User created') setMode(0);
+  }, [registrationError, errorMessage]);
+
+  // setErrorMessage(registrationError);
 
   return (
     <Wrapper>
@@ -151,6 +163,11 @@ function RegisterForm({ setMode }) {
             error={error}
           />
         </InputBox>
+        <InputBox>
+          <Typography align='center' color='error'>
+            {errorMessage}
+          </Typography>
+        </InputBox>
         <ButtonBox>
           <Button
             variant='contained'
@@ -171,4 +188,13 @@ function RegisterForm({ setMode }) {
   );
 }
 
-export default connect()(RegisterForm);
+const mapStateToProps = ({ registrationError = null }) => ({
+  registrationError,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  register: (firstName, lastName, username, email, password) =>
+    dispatch(fetchRegister(firstName, lastName, username, email, password)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(RegisterForm);
