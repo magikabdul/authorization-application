@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 
+import { fetchLogin } from '../../actions';
 import { Button, Link, TextField, Typography } from '@material-ui/core';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
@@ -55,14 +57,18 @@ const ButtonWrapper = styled.div`
   padding-bottom: 20px;
 `;
 
-export function LoginForm({ setMode }) {
+function LoginForm({ token, authenticate, setMode, authorizationError }) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
   const handleClick = (e) => {
     e.preventDefault();
-    console.log('click');
+    authenticate(login, password);
   };
+
+  if (token) {
+    setMode(2);
+  }
 
   return (
     <Wrapper>
@@ -92,6 +98,11 @@ export function LoginForm({ setMode }) {
             onChange={(e) => setPassword(e.target.value)}
           />
         </InputWrapper>
+        {authorizationError && (
+          <Typography align='center' color='error'>
+            {authorizationError}
+          </Typography>
+        )}
         <ButtonWrapper>
           <Button
             color='secondary'
@@ -111,3 +122,14 @@ export function LoginForm({ setMode }) {
     </Wrapper>
   );
 }
+
+const mapStateToProps = ({ token = null, authorizationError = null }) => ({
+  token,
+  authorizationError,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  authenticate: (login, password) => dispatch(fetchLogin(login, password)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
