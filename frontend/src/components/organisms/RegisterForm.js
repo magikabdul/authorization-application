@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+import { connect } from 'react-redux';
+
 import {
   Button,
   Link,
@@ -54,7 +56,7 @@ const ButtonBox = styled.div`
   padding: 30px 10px;
 `;
 
-export function RegisterForm({ setMode }) {
+function RegisterForm({ setMode }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [userName, setUserName] = useState('');
@@ -168,3 +170,5 @@ export function RegisterForm({ setMode }) {
     </Wrapper>
   );
 }
+
+export default connect()(RegisterForm);

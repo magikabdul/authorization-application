@@ -1,9 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 
 import { Button, Typography, SvgIcon } from '@material-ui/core';
 
 import { ReactComponent as LogoutIcon } from '../../assets/svg/logout.svg';
+
+import { doLogout } from '../../actions';
 
 const Wrapper = styled.form`
   display: flex;
@@ -26,7 +29,7 @@ const ButtonWrapper = styled.div`
   margin: 50px auto 0;
 `;
 
-export const UserDetails = ({ user, setMode }) => {
+const UserDetails = ({ user, setMode, logout }) => {
   return (
     <Wrapper>
       <Typography variant='h2' color='textSecondary' align='center'>
@@ -56,7 +59,11 @@ export const UserDetails = ({ user, setMode }) => {
         <Button
           variant='contained'
           color='secondary'
-          onClick={() => setMode(0)}
+          onClick={() => {
+            console.log('logout');
+            setMode(0);
+            logout();
+          }}
           size='large'
           startIcon={<SvgIcon viewBox='0 0 512 512'>{<LogoutIcon />}</SvgIcon>}
         >
@@ -66,3 +73,9 @@ export const UserDetails = ({ user, setMode }) => {
     </Wrapper>
   );
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  logout: () => dispatch(doLogout()),
+});
+
+export default connect(null, mapDispatchToProps)(UserDetails);

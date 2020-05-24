@@ -31,6 +31,13 @@ const rootReducer = (state = {}, action) => {
         isLoading: false,
       };
 
+    case 'LOGOUT':
+      delete state.token;
+      return {
+        ...state,
+        isLoading: false,
+      };
+
     default:
       return state;
   }

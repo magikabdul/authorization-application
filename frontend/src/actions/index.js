@@ -39,3 +39,7 @@ export const fetchLogin = (login, password) => (dispatch) => {
       dispatch({ type: LOGIN.FAILURE, payload: err });
     });
 };
+
+export const doLogout = () => (dispatch) => {
+  dispatch({ type: 'LOGOUT' });
+};
